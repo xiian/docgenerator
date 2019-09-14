@@ -10,7 +10,8 @@
     ],
     "require": {
         "php": ">=7.1",
-        "phpdocumentor/reflection-docblock": "^4.3"
+        "phpdocumentor/reflection-docblock": "^4.3",
+        "xiian/phpdoc-formatters": "dev-master"
     },
     "require-dev": {
         "liip/rmt": "^1.5",
