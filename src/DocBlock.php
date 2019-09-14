@@ -3,20 +3,15 @@ declare(strict_types=1);
 
 namespace xiian\docgenerator;
 
-use phpDocumentor\Reflection\DocBlock\Description;
-use phpDocumentor\Reflection\DocBlock\Tag;
+use phpDocumentor\Reflection\DocBlock\{Description, Tag};
 use xiian\PHPDocFormatters\Tags\Formatter\AlignBetterFormatter;
 
 class DocBlock
 {
-    /**
-     * @var Description
-     */
+    /** @var Description */
     protected $description;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $summary;
 
     /**
