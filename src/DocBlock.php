@@ -24,6 +24,7 @@ class DocBlock
 
     public function __toString()
     {
+        // TODO: This could all be done in another Formatter!
         $rawString = $this->getSummary() . PHP_EOL . PHP_EOL . wordwrap($this->getDescription()->render(), 67, PHP_EOL, false);
 
         // Wrap with leading asterisks
