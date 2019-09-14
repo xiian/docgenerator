@@ -11,6 +11,7 @@
     "require": {
         "php": ">=7.1",
         "phpdocumentor/reflection-docblock": "^4.3",
+        "ramsey/collection": "^1.0",
         "xiian/phpdoc-formatters": "dev-master"
     },
     "require-dev": {
