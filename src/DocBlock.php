@@ -24,7 +24,7 @@ class DocBlock
 
     public function __toString()
     {
-        $rawString = $this->summary . PHP_EOL . PHP_EOL . wordwrap($this->getDescription()->render(), 67, PHP_EOL, false);
+        $rawString = $this->getSummary() . PHP_EOL . PHP_EOL . wordwrap($this->getDescription()->render(), 67, PHP_EOL, false);
 
         // Wrap with leading asterisks
         $implode = implode(PHP_EOL . ' * ', explode(PHP_EOL, $rawString));
@@ -33,9 +33,9 @@ class DocBlock
         $wrapped = implode(PHP_EOL, array_map('rtrim', explode(PHP_EOL, $implode)));
 
         // Tags
-        $formatter   = new AlignBetterFormatter($this->tags->toArray());
+        $formatter   = new AlignBetterFormatter($this->getTags());
         $lastTagName = null;
-        foreach ($this->tags as $tag) {
+        foreach ($this->getTags() as $tag) {
             if ($tag->getName() !== $lastTagName) {
                 $wrapped     .= PHP_EOL . ' *';
                 $lastTagName = $tag->getName();
@@ -62,7 +62,7 @@ class DocBlock
 
     public function addDescription(string $in): self
     {
-        $this->description = new Description($this->description->render() . PHP_EOL . $in);
+        $this->description = new Description($this->getDescription()->render() . PHP_EOL . $in);
         return $this;
     }
 
@@ -72,12 +72,12 @@ class DocBlock
         return $this;
     }
 
-    public function getSummary(): string
+    public function getSummary(): ?string
     {
         return $this->summary;
     }
 
-    public function setSummary(string $in): self
+    public function setSummary(?string $in): self
     {
         $this->summary = $in;
         return $this;
@@ -98,12 +98,12 @@ class DocBlock
      */
     public function getTagsByName($name): array
     {
-        return [];
+        return $this->tags->where('getName', $name);
     }
 
     public function hasTag(string $name): bool
     {
-        return false;
+        return count($this->getTagsByName($name)) === 0;
     }
 
     public function removeTag(Tag $tagToRemove): void
