@@ -14,10 +14,13 @@ class DocBlock
     /** @var string */
     protected $summary;
 
-    /**
-     * @var Tag[]
-     */
+    /** @var TagsCollection|Tag[] */
     protected $tags;
+
+    public function __construct()
+    {
+        $this->tags = new TagsCollection();
+    }
 
     public function __toString()
     {
@@ -30,7 +33,7 @@ class DocBlock
         $wrapped = implode(PHP_EOL, array_map('rtrim', explode(PHP_EOL, $implode)));
 
         // Tags
-        $formatter   = new AlignBetterFormatter($this->tags);
+        $formatter   = new AlignBetterFormatter($this->tags->toArray());
         $lastTagName = null;
         foreach ($this->tags as $tag) {
             if ($tag->getName() !== $lastTagName) {
@@ -85,7 +88,7 @@ class DocBlock
      */
     public function getTags(): array
     {
-        return $this->tags;
+        return $this->tags->toArray();
     }
 
     /**
