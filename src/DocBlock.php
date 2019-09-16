@@ -100,6 +100,17 @@ class DocBlock
         return $this->tags->toArray();
     }
 
+    public function getTagsCollection():TagsCollection
+    {
+        return $this->tags;
+    }
+
+    public function setTagsCollection(TagsCollection $tags): self
+    {
+        $this->tags = $tags;
+        return $this;
+    }
+
     /**
      * @param $name
      *
