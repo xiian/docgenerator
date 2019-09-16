@@ -27,6 +27,8 @@ class DocBlock
         // TODO: This could all be done in another Formatter!
         $rawString = $this->getSummary() . PHP_EOL . PHP_EOL . wordwrap($this->getDescription()->render(), 67, PHP_EOL, false);
 
+        $rawString = trim($rawString);
+
         // Wrap with leading asterisks
         $implode = implode(PHP_EOL . ' * ', explode(PHP_EOL, $rawString));
 
@@ -42,6 +44,12 @@ class DocBlock
                 $lastTagName = $tag->getName();
             }
             $wrapped .= PHP_EOL . ' * ' . $formatter->format($tag);
+        }
+
+        $wrapped = trim($wrapped);
+
+        if (empty($wrapped)) {
+            return '/** */';
         }
 
         return '/**' . PHP_EOL . ' * ' . $wrapped . PHP_EOL . ' */';
