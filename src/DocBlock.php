@@ -139,6 +139,9 @@ class DocBlock
                         if ($a instanceof Method && $b instanceof Method) {
                             return $a->getMethodName() <=> $b->getMethodName();
                         }
+                        if ($a instanceof \xiian\docgenerator\Tags\Method && $b instanceof \xiian\docgenerator\Tags\Method) {
+                            return $a->getMethodName() <=> $b->getMethodName();
+                        }
                     }
                     return $a->getName() <=> $b->getName();
                 });
