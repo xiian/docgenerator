@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace xiian\docgenerator;
 
-use phpDocumentor\Reflection\DocBlock\{Description, Tag};
+use phpDocumentor\Reflection\DocBlock\{Description, Tag, Tags\Method, Tags\Property};
 use xiian\PHPDocFormatters\Tags\Formatter\AlignBetterFormatter;
 
 class DocBlock
@@ -22,10 +22,28 @@ class DocBlock
         $this->tags = new TagsCollection();
     }
 
+    public static function fromReflectionDocBlock(\phpDocumentor\Reflection\DocBlock $docblock): self
+    {
+        $out = new self();
+        $out->setSummary($docblock->getSummary());
+        $out->setDescription($docblock->getDescription()->render());
+        foreach ($docblock->getTags() as $tag) {
+            $out->addTag($tag);
+        }
+        return $out;
+    }
+
+    public function addTag(Tag $tag): self
+    {
+        $this->tags[] = $tag;
+        return $this;
+    }
+
     public function __toString()
     {
         // TODO: This could all be done in another Formatter!
-        $rawString = $this->getSummary() . PHP_EOL . PHP_EOL . wordwrap($this->getDescription()->render(), 67, PHP_EOL, false);
+        $description = $this->getDescription();
+        $rawString   = $this->getSummary() . PHP_EOL . PHP_EOL . wordwrap($description->render(), 67, PHP_EOL, false);
 
         $rawString = trim($rawString);
 
@@ -69,18 +87,6 @@ class DocBlock
         return $this;
     }
 
-    public function addDescription(string $in): self
-    {
-        $this->description = new Description($this->getDescription()->render() . PHP_EOL . $in);
-        return $this;
-    }
-
-    public function addTag(Tag $tag): self
-    {
-        $this->tags[] = $tag;
-        return $this;
-    }
-
     public function getSummary(): ?string
     {
         return $this->summary;
@@ -100,15 +106,56 @@ class DocBlock
         return $this->tags->toArray();
     }
 
-    public function getTagsCollection():TagsCollection
+    public function addDescription(string $in): self
+    {
+        $this->description = new Description($this->getDescription()->render() . PHP_EOL . $in);
+        return $this;
+    }
+
+    public function asReflectionDocBlock(): \phpDocumentor\Reflection\DocBlock
+    {
+        return new \phpDocumentor\Reflection\DocBlock(
+            $this->getSummary(),
+            $this->getDescription(),
+            $this->getTags(),
+        );
+    }
+
+    /**
+     * @param bool $sortedTags
+     *
+     * @return Tag[][]
+     */
+    public function getTagGroups($sortedTags = false): array
+    {
+        $groups = [];
+        foreach ($this->tags->getByAnnotation() as $name => $tags) {
+            if ($sortedTags) {
+                usort($tags, function (Tag $a, Tag $b) {
+                    if ($a->getName() == $b->getName()) {
+                        if ($a instanceof Property && $b instanceof Property) {
+                            return $a->getVariableName() <=> $b->getVariableName();
+                        }
+                        if ($a instanceof Method && $b instanceof Method) {
+                            return $a->getMethodName() <=> $b->getMethodName();
+                        }
+                    }
+                    return $a->getName() <=> $b->getName();
+                });
+            }
+            $groups[$name] = $tags;
+        }
+        return $groups;
+    }
+
+    public function getTagsCollection(): TagsCollection
     {
         return $this->tags;
     }
 
-    public function setTagsCollection(TagsCollection $tags): self
+    public function hasTag(string $name): bool
     {
-        $this->tags = $tags;
-        return $this;
+        return count($this->getTagsByName($name)) === 0;
     }
 
     /**
@@ -121,13 +168,44 @@ class DocBlock
         return $this->tags->where('getName', $name);
     }
 
-    public function hasTag(string $name): bool
+    /**
+     * @param Tag[] $tags
+     *
+     * @throws \Exception
+     */
+    public function mergeTags(array $tags)
     {
-        return count($this->getTagsByName($name)) === 0;
+        foreach ($tags as $incomingTag) {
+            // Find existing one
+            $existing = $this->tags->findMatching($incomingTag);
+            if (count($existing) > 1) {
+                throw new \Exception('Multiple matching tags found that matched ' . $incomingTag->getName());
+            }
+            if (count($existing)) {
+                // Make sure types match
+                /** @var Tag $matched */
+                $matched = $existing[0];
+
+                if ($matched instanceof Property && $incomingTag instanceof Property) {
+                    if ((string) $matched->getType() !== (string) $incomingTag->getType()) {
+                        throw new \Exception('Mismatched types for $' . $incomingTag->getVariableName() . '! Already had: ' . (string) $matched->getType() . ' and was given: ' . (string) $incomingTag->getType());
+                    }
+                }
+
+                continue;
+            }
+            $this->addTag($incomingTag);
+        }
     }
 
     public function removeTag(Tag $tagToRemove): void
     {
 
+    }
+
+    public function setTagsCollection(TagsCollection $tags): self
+    {
+        $this->tags = $tags;
+        return $this;
     }
 }
