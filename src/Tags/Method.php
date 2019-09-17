@@ -11,6 +11,7 @@ use phpDocumentor\Reflection\TypeResolver;
 use phpDocumentor\Reflection\Types\Context as TypeContext;
 use phpDocumentor\Reflection\Types\Void_;
 use Webmozart\Assert\Assert;
+use xiian\docgenerator\Argument;
 
 /**
  * Copied wholesale from \phpDocumentor\Reflection\DocBlock\Tags\Method because it's marked as final.
@@ -27,7 +28,7 @@ class Method extends BaseTag implements Annotatable
     /** @var string */
     private $methodName = '';
 
-    /** @var string[] */
+    /** @var Argument[] */
     private $arguments = [];
 
     /** @var bool */
@@ -57,23 +58,24 @@ class Method extends BaseTag implements Annotatable
         $this->description = $description;
     }
 
-    private function filterArguments($arguments)
+    /**
+     * @param $arguments
+     *
+     * @return Argument[]
+     */
+    private function filterArguments($arguments): array
     {
         foreach ($arguments as &$argument) {
+            if ($argument instanceof Argument) {
+                continue;
+            }
+
             if (is_string($argument)) {
                 $argument = ['name' => $argument];
             }
 
-            if (!isset($argument['type'])) {
-                $argument['type'] = new Void_();
-            }
-
-            $keys = array_keys($argument);
-            sort($keys);
-            if ($keys !== ['name', 'type']) {
-                throw new \InvalidArgumentException(
-                    'Arguments can only have the "name" and "type" fields, found: ' . var_export($keys, true)
-                );
+            if (is_array($argument)) {
+                $argument = new Argument($argument['name'], $argument['type'] ?? new Void_());
             }
         }
 
@@ -214,9 +216,11 @@ class Method extends BaseTag implements Annotatable
     /**
      * @return string[]
      */
-    public function getArguments()
+    public function getArguments(): array
     {
-        return $this->arguments;
+        return array_map(function (Argument $a) {
+            return (string) $a;
+        }, $this->arguments);
     }
 
     /**
