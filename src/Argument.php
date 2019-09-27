@@ -21,7 +21,7 @@ class Argument
      */
     protected $defaultValue;
 
-    public function __construct(string $name, Type $type, string $defaultValue = null)
+    public function __construct(string $name, Type $type = null, string $defaultValue = null)
     {
         $this->name         = $name;
         $this->type         = $type;
