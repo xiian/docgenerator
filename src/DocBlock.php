@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace xiian\docgenerator;
 
-use phpDocumentor\Reflection\DocBlock\{Description, Tag, Tags\Method, Tags\Property};
+use phpDocumentor\Reflection\DocBlock\{Description, Tag, Tags\Property};
 use xiian\PHPDocFormatters\Tags\Formatter\AlignBetterFormatter;
 
 class DocBlock
@@ -128,27 +128,7 @@ class DocBlock
      */
     public function getTagGroups($sortedTags = false): array
     {
-        $groups = [];
-        foreach ($this->tags->getByAnnotation() as $name => $tags) {
-            if ($sortedTags) {
-                usort($tags, function (Tag $a, Tag $b) {
-                    if ($a->getName() == $b->getName()) {
-                        if ($a instanceof Property && $b instanceof Property) {
-                            return $a->getVariableName() <=> $b->getVariableName();
-                        }
-                        if ($a instanceof Method && $b instanceof Method) {
-                            return $a->getMethodName() <=> $b->getMethodName();
-                        }
-                        if ($a instanceof \xiian\docgenerator\Tags\Method && $b instanceof \xiian\docgenerator\Tags\Method) {
-                            return $a->getMethodName() <=> $b->getMethodName();
-                        }
-                    }
-                    return $a->getName() <=> $b->getName();
-                });
-            }
-            $groups[$name] = $tags;
-        }
-        return $groups;
+        return $this->tags->getByName($sortedTags);
     }
 
     public function getTagsCollection(): TagsCollection
