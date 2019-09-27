@@ -193,7 +193,11 @@ class Method extends BaseTag implements Annotatable
     {
         $arguments = [];
         foreach ($this->arguments as $argument) {
-            $arguments[] = $argument->getType() . ' $' . $argument->getName();
+            if (is_array($argument)) {
+                $arguments[] = $argument['type'] . ' $' . $argument['name'];
+            } else {
+                $arguments[] = (string) $argument;
+            }
         }
 
         return trim(($this->isStatic() ? 'static ' : '')
