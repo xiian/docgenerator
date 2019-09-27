@@ -4,8 +4,7 @@ declare(strict_types=1);
 namespace xiian\docgenerator;
 
 use phpDocumentor\Reflection\DocBlock\Tag;
-use phpDocumentor\Reflection\DocBlock\Tags\Method;
-use phpDocumentor\Reflection\DocBlock\Tags\Property;
+use phpDocumentor\Reflection\DocBlock\Tags\{Method, Property, PropertyRead, PropertyWrite};
 use Ramsey\Collection\AbstractCollection;
 use xiian\docgenerator\Tags\Annotatable;
 
@@ -53,9 +52,39 @@ class TagsCollection extends AbstractCollection
         return $this->_indexedByAnnotation;
     }
 
-    public function getByName(): array
+    public function getByName($sorted = false): array
     {
+        if ($sorted) {
+            return array_map(function ($r) {
+                usort($r, [$this, 'sortTags']);
+                return $r;
+            }, $this->_indexedByName);
+        }
         return $this->_indexedByName;
+    }
+
+    public function sortTags(Tag $a, Tag $b)
+    {
+        $aEffectiveName = $this->deAliasTagName($a->getName());
+        $bEffectiveName = $this->deAliasTagName($b->getName());
+
+        if ($aEffectiveName == $bEffectiveName) {
+            if (
+                ($a instanceof Property || $a instanceof PropertyRead || $a instanceof PropertyWrite)
+                &&
+                ($b instanceof Property || $b instanceof PropertyRead || $b instanceof PropertyWrite)
+            ) {
+                return strtolower($a->getVariableName()) <=> strtolower($b->getVariableName());
+            }
+            if ($a instanceof Method && $b instanceof Method) {
+                return strtolower($a->getMethodName()) <=> strtolower($b->getMethodName());
+            }
+            if ($a instanceof Tags\Method && $b instanceof Tags\Method) {
+                return strtolower($a->getMethodName()) <=> strtolower($b->getMethodName());
+            }
+        }
+
+        return $aEffectiveName <=> $bEffectiveName;
     }
 
     public function getType(): string
