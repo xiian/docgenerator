@@ -20,6 +20,11 @@ class TagsCollection extends AbstractCollection
 
     private $_indexedByAnnotation = [];
 
+    public static $aliases = [
+        'property-read'  => 'property',
+        'property-write' => 'property',
+    ];
+
     public function findMatching(Tag $tag)
     {
         return $this->filter(function (Tag $t) use ($tag) {
@@ -67,8 +72,9 @@ class TagsCollection extends AbstractCollection
             return;
         }
 
-        // Index by name
-        $name = $value->getName();
+        // Index by (aliased) name
+        $name = $this->deAliasTagName($value->getName());
+
         if (!array_key_exists($name, $this->_indexedByName) || !is_array($this->_indexedByName[$name])) {
             $this->_indexedByName[$name] = [];
         }
@@ -86,4 +92,14 @@ class TagsCollection extends AbstractCollection
             $this->_indexedByAnnotation[0][] = $value;
         }
     }
+
+    public function deAliasTagName($name): string
+    {
+        if (array_key_exists($name, self::$aliases)) {
+            $name = self::$aliases[$name];
+        }
+        return $name;
+    }
+
+
 }
