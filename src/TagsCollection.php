@@ -102,7 +102,7 @@ class TagsCollection extends AbstractCollection
         }
 
         // Index by (aliased) name
-        $name = $this->deAliasTagName($value->getName());
+        $name = $this->deAliasTagName((string) $value->getName());
 
         if (!array_key_exists($name, $this->_indexedByName) || !is_array($this->_indexedByName[$name])) {
             $this->_indexedByName[$name] = [];
@@ -122,7 +122,7 @@ class TagsCollection extends AbstractCollection
         }
     }
 
-    public function deAliasTagName($name): string
+    public function deAliasTagName(string $name): string
     {
         if (array_key_exists($name, self::$aliases)) {
             $name = self::$aliases[$name];
