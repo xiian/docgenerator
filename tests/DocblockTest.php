@@ -5,7 +5,7 @@ namespace xiian\docgenerator\test;
 
 use phpDocumentor\Reflection\DocBlock\Description;
 use phpDocumentor\Reflection\DocBlock\Tag;
-use phpDocumentor\Reflection\DocBlock\Tags\{Author, Param, Since};
+use phpDocumentor\Reflection\DocBlock\Tags\{Param, Since};
 use phpDocumentor\Reflection\Types\{Integer, String_};
 use PHPUnit\Framework\TestCase;
 use xiian\docgenerator\DocBlock;
@@ -76,7 +76,9 @@ class DocblockTest extends TestCase
 
     private function createMockTag(): Tag
     {
-        return $this->getMockBuilder(Tag::class)->getMock();
+        /** @var Tag $mockObject */
+        $mockObject = $this->getMockBuilder(Tag::class)->getMock();
+        return $mockObject;
     }
 
     /**
@@ -224,8 +226,6 @@ class DocblockTest extends TestCase
         $this->sut->addDescription('');
         $this->sut->addDescription('The section after the description contains the tags; which provide structured meta-data concerning the given element.');
 
-        $this->sut->addTag(new Author('Mike van Riel', 'me@mikevanriel.com'));
-
         $this->sut->addTag(new Since('1.0'));
 
         $this->sut->addTag(new Param('example', new Integer(), false, new Description('This is an example function/method parameter description.')));
@@ -243,8 +243,6 @@ class DocblockTest extends TestCase
  *
  * The section after the description contains the tags; which provide
  * structured meta-data concerning the given element.
- *
- * @author Mike van Riel <me@mikevanriel.com>
  *
  * @since 1.0
  *
