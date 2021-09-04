@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">=7.3",
-        "phpdocumentor/reflection-docblock": "^4.3",
+        "phpdocumentor/reflection-docblock": "^4 || ^5",
         "ramsey/collection": "^1.0",
         "xiian/phpdoc-formatters": "^1.0"
     },
